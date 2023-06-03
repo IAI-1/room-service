@@ -61,9 +61,7 @@ export const bookingRoom = async (req, res, next) => {
     // Verify book availibility
     const room = await Room.findOne({ _id: req.body.roomId });
     if (!room) throw httpNotFound('Book not found');
-    if (room.numOfAvailableRooms < 1) {
-      throw httpException(409, 'Out of room');
-    }
+    
 
     // Add borrow
     const booking = new Booking({
@@ -78,7 +76,6 @@ export const bookingRoom = async (req, res, next) => {
     await Room.updateOne(
       { _id: req.body.roomId },
       {
-        numOfAvailableRooms: room.numOfAvailableRooms - 1,
         bookerIds: [...room.bookerIds, req.user.id],
       }
     );
@@ -122,7 +119,6 @@ export const returnRoom = async (req, res, next) => {
     await Room.updateOne(
       { _id: mongoose.Types.ObjectId(req.body.roomId) },
       {
-        numOfAvailableRooms: book.numOfAvailableRooms + 1,
         bookerIds: room.bookerIds,
       }
     );

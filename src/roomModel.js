@@ -2,24 +2,19 @@ import mongoose from 'mongoose';
 
 const roomSchema = new mongoose.Schema(
   {
-    roomName: {
+    name: {
       type: String,
       required: true,
     },
-    roomtype: {
+    type: {
       type: String,
       required: true,
     },
-    numOfRooms: {
-      type: Number,
+    location: {
+      type: String,
       required: true,
     },
-    numOfAvailableRooms: {
-      type: Number,
-      default: function () {
-        return this.numOfRooms;
-      },
-    },
+    
     bookerIds: {
       type: [mongoose.Types.ObjectId],
       required: false,
