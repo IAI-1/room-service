@@ -92,14 +92,56 @@ export const bookingRoom = async (req, res, next) => {
   }
 };
 
+// export const returnRoom = async (req, res, next) => {
+//   try {
+//     // Change status isReturned to true
+//     const booking = await Booking.findOneAndUpdate(
+//       {
+//         // look for this doc
+//         userId: mongoose.Types.ObjectId(req.user.id),
+//         roomId: mongoose.Types.ObjectId(req.body.roomId),
+//         isReturned: false,
+//       },
+//       {
+//         // and update the doc's value
+//         isReturned: true,
+//         returnedAt: new Date(),
+//       }
+//     );
+//     if (!booking) throw httpNotFound('Borrow not found');
+
+//     // Remove one borrowerId from book
+//     const room = await Room.findOne({ _id: req.body.roomId });
+
+//     const bookerIndex = room.bookerIds.indexOf(req.user.id);
+//     room.bookerIds.splice(bookerIndex, 1);
+
+//     await Room.updateOne(
+//       { _id: mongoose.Types.ObjectId(req.body.roomId) },
+//       {
+//         bookerIds: room.bookerIds,
+//       }
+//     );
+
+//     const detailedBooking = await getDetailedBooking(booking);
+
+//     res.status(200).json(successResponseBuilder({ borrow: detailedBooking }));
+//   } catch (err) {
+//     if (['CastError', 'ValidationError'].includes(err?.name)) {
+//       next(httpBadRequest(err.message));
+//     }
+//     next(err);
+//   }
+// };
+
 export const returnRoom = async (req, res, next) => {
   try {
     // Change status isReturned to true
     const booking = await Booking.findOneAndUpdate(
       {
         // look for this doc
+        _id: mongoose.Types.ObjectId(req.body.bookingId),
         userId: mongoose.Types.ObjectId(req.user.id),
-        roomId: mongoose.Types.ObjectId(req.body.roomId),
         isReturned: false,
       },
       {
@@ -108,16 +150,16 @@ export const returnRoom = async (req, res, next) => {
         returnedAt: new Date(),
       }
     );
-    if (!booking) throw httpNotFound('Borrow not found');
+    if (!booking) throw httpNotFound('Booking not found');
 
-    // Remove one borrowerId from book
-    const room = await Room.findOne({ _id: req.body.roomId });
+    // Remove the bookerId from the room
+    const room = await Room.findOne({ _id: booking.roomId });
 
     const bookerIndex = room.bookerIds.indexOf(req.user.id);
     room.bookerIds.splice(bookerIndex, 1);
 
     await Room.updateOne(
-      { _id: mongoose.Types.ObjectId(req.body.roomId) },
+      { _id: booking.roomId },
       {
         bookerIds: room.bookerIds,
       }
@@ -125,7 +167,7 @@ export const returnRoom = async (req, res, next) => {
 
     const detailedBooking = await getDetailedBooking(booking);
 
-    res.status(200).json(successResponseBuilder({ borrow: detailedBooking }));
+    res.status(200).json(successResponseBuilder({ booking: detailedBooking }));
   } catch (err) {
     if (['CastError', 'ValidationError'].includes(err?.name)) {
       next(httpBadRequest(err.message));
